@@ -187,3 +187,4 @@ $lowStockItems = $pdo->query("SELECT * FROM medicines WHERE quantity > 0 AND qua
 <?php endforeach; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+//devrakin
