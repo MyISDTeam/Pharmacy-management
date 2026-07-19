@@ -32,4 +32,5 @@ CREATE TABLE IF NOT EXISTS inventory (
 );
 
 -- Default admin (password: admin123)
-INSERT INTO users (username, password) VALUES ('admin', 'admin123');
+INSERT INTO users (username, password)
+VALUES ('admin', '$2y$10$uJ3OmgKGuc3zxAY7JoBtDuDaCPy9XMAirTIE6m11z5W3nx91tDrAC');

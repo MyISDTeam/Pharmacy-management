@@ -18,7 +18,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
-        if ($user && $password === $user['password']) {
+        $passwordIsValid = $user && password_verify($password, $user['password']);
+        $usesLegacyPassword = $user
+            && password_get_info($user['password'])['algo'] === null
+            && hash_equals($user['password'], $password);
+
+        if ($passwordIsValid || $usesLegacyPassword) {
+            if ($usesLegacyPassword || password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
+                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                $updateStmt = $pdo->prepare('UPDATE users SET password = ? WHERE user_id = ?');
+                $updateStmt->execute([$newHash, $user['user_id']]);
+            }
+
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
@@ -51,6 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h3 class="mt-2">Pharmacy MS</h3>
                     <p class="text-muted">Sign in to your account</p>
                 </div>
+                <?php if (isset($_GET['registered'])): ?>
+                    <div class="alert alert-success" role="alert">
+                        Account created successfully. You can now sign in.
+                    </div>
+                <?php endif; ?>
                 <?php if ($error): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <?= htmlspecialchars($error) ?>
@@ -60,14 +77,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form method="POST" action="">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required autofocus>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" autocomplete="username" required autofocus>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" autocomplete="current-password" required>
                     </div>
                     <button type="submit" class="btn btn-login w-100">Sign In</button>
                 </form>
+                <p class="text-center text-muted mt-3 mb-0">
+                    Don't have an account? <a href="signup.php">Sign up</a>
+                </p>
             </div>
         </div>
     </div>
