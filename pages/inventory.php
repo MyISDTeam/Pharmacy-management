@@ -1,6 +1,6 @@
 <?php
 ob_start();
-//Include the header files
+
 require_once __DIR__ . '/../includes/header.php';
 $header = ob_get_clean();
 requireLogin();

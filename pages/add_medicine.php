@@ -1,5 +1,4 @@
 <?php
-//Include the database header files
 require_once __DIR__ . '/../includes/header.php';
 requireLogin();
 
